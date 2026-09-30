@@ -1,0 +1,21 @@
+services:
+  ml-api:
+    build: .
+    container_name: ml-api
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data:ro        # put insurance_claims.csv here
+      - ml_models:/models          # trained model versions survive restarts
+    networks:
+      - fraudnet
+
+volumes:
+  ml_models:
+
+networks:
+  fraudnet:
+    name: fraud-net
+    external: true                 # created once with: docker network create fraud-net
