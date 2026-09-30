@@ -1,0 +1,367 @@
+{
+  "name": "Fraud detection",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "claims",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "daf85f7c-f6c5-4476-85f0-844f4b2ee378",
+      "name": "Webhook",
+      "webhookId": "5fdfcce1-a828-432e-ac8b-54dd4f5895bb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "361ec69b-bf5b-4e34-a5bc-64277e4fc8c6",
+              "name": "body.claimId",
+              "value": "={{ $json.body.claimId }}",
+              "type": "string"
+            },
+            {
+              "id": "3ebb0ddb-ef95-4ce0-955d-2b5d9cd7afad",
+              "name": "body.policyId",
+              "value": "={{ $json.body.policyId }}",
+              "type": "string"
+            },
+            {
+              "id": "8d638839-4cd3-4d75-88a4-f87c5b4a5043",
+              "name": "body.claimAmount",
+              "value": "={{ $json.body.claimAmount }}",
+              "type": "string"
+            },
+            {
+              "id": "cce6d281-fd2d-481d-81cc-26a1f91274a1",
+              "name": "body.claimType",
+              "value": "={{ $json.body.claimType }}",
+              "type": "string"
+            },
+            {
+              "id": "45fe11cd-69e0-4fc9-990b-3e5de542f288",
+              "name": "body.claimDescription",
+              "value": "={{ $json.body.claimDescription }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b96716f3-30d0-4f6a-bc9e-f465f46a5f51",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ml-api:8000/predict",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "7c3e9a51-2f4d-4b8e-9d61-5a0f8e2b41c7",
+      "name": "ML Fraud Scoring",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "claims",
+          "mode": "list",
+          "cachedResultName": "claims"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "claim_amount": "={{ $json.claimAmount }}",
+            "fraud_score": "={{ $json.fraud_score }}",
+            "claim_id": "={{ $json.claimId }}",
+            "claim_description": "={{ $json.claimDescription }}",
+            "claim_type": "={{ $json.claimType }}",
+            "risk_level": "={{ $json.risk_level }}",
+            "fraud_flags": "={{ $json.fraud_flags }}",
+            "status": "={{ $json.status }}",
+            "policy_id": "={{ $json.policyId }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "claim_id",
+              "displayName": "claim_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "policy_id",
+              "displayName": "policy_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "claim_amount",
+              "displayName": "claim_amount",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "claim_type",
+              "displayName": "claim_type",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "claim_description",
+              "displayName": "claim_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fraud_score",
+              "displayName": "fraud_score",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk_level",
+              "displayName": "risk_level",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fraud_flags",
+              "displayName": "fraud_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        656,
+        0
+      ],
+      "id": "aaa90b0a-b896-430f-992f-e6c23e0ce20c",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "ttcL3gKB5GWluwP0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "347c1162-1685-4460-80f0-be92adc6e0e2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "482dbc37-1c0e-47ac-91e2-725145f226e3",
+      "name": "Webhook1",
+      "webhookId": "347c1162-1685-4460-80f0-be92adc6e0e2"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    claim_id,\n    policy_id,\n    claim_amount,\n    claim_type,\n    claim_description,\n    fraud_score,\n    risk_level,\n    fraud_flags,\n    status,\n    created_at\nFROM claims\nWHERE claim_id = '{{ $json.query.claimId }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        224,
+        192
+      ],
+      "id": "8e4092aa-2e70-445d-9fef-5fdf29b86b4f",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "ttcL3gKB5GWluwP0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"claimId\": \"={{ $json.claim_id }}\",\n  \"policyId\": \"={{ $json.policy_id }}\",\n  \"claimAmount\": \"={{ $json.claim_amount }}\",\n  \"claimType\": \"={{ $json.claim_type }}\",\n  \"claimDescription\": \"={{ $json.claim_description }}\",\n  \"fraudScore\": \"={{ $json.fraud_score }}\",\n  \"riskLevel\": \"={{ $json.risk_level }}\",\n  \"fraudFlags\": \"={{ $json.fraud_flags }}\",\n  \"status\": \"={{ $json.status }}\",\n  \"createdAt\": \"={{ $json.created_at }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        192
+      ],
+      "id": "c92d4b5a-a8a8-4e2d-b12c-e10059a86305",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "ML Fraud Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ML Fraud Scoring": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b70c1675-02c8-4c21-8cb5-948b3aeac900",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f8e1f49d46243d0d7675f986a81e4df0d2802f8192d3c90726922e8f516b912"
+  },
+  "nodeGroups": [],
+  "id": "3g9yJaq1pAXEVStW",
+  "tags": []
+}
